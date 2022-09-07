@@ -1,99 +1,77 @@
 buttons = {}
+states = {}
 
 currState = null
-startState = null
-leftOrRight = null
-leftTicking = null
-rightTicking = null
-leftPaused = null
-rightPaused = null
-editor = null
 
 class Button
-	constructor : (@text,@x,@y,@w,@h,@bg,@fg) ->
-		@enabled = true
+	constructor : (@text,@x,@y,@w,@h,@bg,@fg) -> @enabled = true
 	draw : ->
 		fill @bg
 		rect @x,@y,@w,@h
 		fill @fg
 		text @text,@x,@y
-	inside : -> @x-@w/2 <= mouseX <= @x+@w/2 and @y-@h/2 <= mouseY <= @y+@h/2
+	inside : -> -@w/2 <= mouseX-@x <= @w/2 and -@h/2 <= mouseY-@y <= @h/2
 
 class State
-	constructor : ->
-		@transitions = {}
-	getButtons : (names) ->
-		result = {}
-		for key in names.split ' '
-			if key of buttons
-				result[key] = buttons[key] 
-			else 
-				console.log 'missing button:',key
-		result
+	constructor : -> @transitions = {}
+	createTrans : (b,s) -> @transitions[b] = s
 	message : (key) ->
-		if key of @transitions 
-			transition = @transitions[key]
-			currState = transition
-		else
-			console.log 'missing transition:',key
+		if key of @transitions then currState = states[@transitions[key]]
+		else console.log 'missing transition:',key
+
+createState = (key,klass) -> states[key] = new klass key
 
 ###################################
 
 class StartState extends State
 	constructor : (@name) ->
 		super()
-		@buttons = @getButtons 'left right play new'
-	setTransitions : ->
-		@transitions['play'] = leftOrRight
-		@transitions['new'] = editor
+		@createTrans 'left',  ''            # dead button
+		@createTrans 'right', ''            # dead button
+		@createTrans 'play',  'LeftOrRight' # active button
+		@createTrans 'new',   'Editor'      # active button
 
 class LeftOrRight extends State
 	constructor : (@name) ->
 		super()
-		@buttons = @getButtons 'left right pause'
-	setTransitions : ->
-		@transitions['pause'] = startState
-		@transitions['left'] = rightTicking
-		@transitions['right'] = leftTicking
+		@createTrans 'left',  'RightTicking'
+		@createTrans 'right', 'LeftTicking'
+		@createTrans 'pause', 'StartState'
 
 class LeftTicking extends State
 	constructor : (@name) ->
 		super()
-		@buttons = @getButtons 'left right pause'
-	setTransitions : ->
-		@transitions['left'] = rightTicking
-		@transitions['pause'] = leftPaused
+		@createTrans 'left',  'rightTicking'
+		@createTrans 'right', ''
+		@createTrans 'pause', 'LeftPaused'
 
 class RightTicking extends State
 	constructor : (@name) ->
 		super()
-		@buttons = @getButtons 'left right pause'
-	setTransitions : ->
-		@transitions['right'] = leftTicking
-		@transitions['pause'] = rightPaused
+		@createTrans 'left',  ''
+		@createTrans 'right', 'LeftTicking'
+		@createTrans 'pause', 'RightPaused'
 
 class LeftPaused extends State
 	constructor : (@name) ->
 		super()
-		@buttons = @getButtons 'left right play new'
-	setTransitions : ->
-		@transitions['play'] = leftTicking
-		@transitions['new'] = editor
+		@createTrans 'left',  ''
+		@createTrans 'right', ''
+		@createTrans 'play',  'LeftTicking'
+		@createTrans 'new',  'Editor'
 
 class RightPaused extends State
 	constructor : (@name) ->
 		super()
-		@buttons = @getButtons 'left right play new'
-	setTransitions : ->
-		@transitions['play'] = rightTicking
-		@transitions['new'] = editor
+		@createTrans 'left',  ''
+		@createTrans 'right', ''
+		@createTrans 'play',  'RightTicking'
+		@createTrans 'new',   'Editor'
 
 class Editor extends State
 	constructor : (@name) ->
 		super()
-		@buttons = @getButtons 'ok'
-	setTransitions : ->
-		@transitions['ok'] = startState
+		@createTrans 'ok', 'StartState'
 
 setup = ->
 	createCanvas 300,300
@@ -102,46 +80,33 @@ setup = ->
 	textAlign CENTER,CENTER
 	rectMode CENTER
 
-	buttons['left'] =  new Button 'left', 150, 50, 300, 100,'white','black'
-	buttons['right'] = new Button 'right',150,250, 300, 100,'red','black'
-	buttons['play'] =  new Button 'play', 50, 150, 100, 100,'yellow','black'
-	buttons['pause'] = new Button 'pause',50, 150, 100, 100,'green','white'
-	buttons['new'] =   new Button 'new',  250,150, 100, 100,'pink','black'
-	buttons['ok'] =    new Button 'ok',  150,250, 100, 100,'white','black'
+	buttons.left  = new Button 'left', 150,  50, 300, 100,'white','black'
+	buttons.right = new Button 'right',150, 250, 300, 100,'red','black'
+	buttons.play  = new Button 'play',  50, 150, 100, 100,'yellow','black'
+	buttons.pause = new Button 'pause', 50, 150, 100, 100,'green','white'
+	buttons.new   = new Button 'new',  250, 150, 100, 100,'pink','black'
+	buttons.ok    = new Button 'ok',   150, 250, 100, 100,'white','black'
 
-	startState = new StartState 'startState'
-	leftOrRight = new LeftOrRight 'leftOrRight'
-	editor = new Editor 'Editor'
-	leftTicking = new LeftTicking 'leftTicking'
-	rightTicking = new RightTicking 'rightTicking'
-	leftPaused = new LeftPaused 'leftPaused'
-	rightPaused = new RightPaused 'rightPaused'
+	createState 'StartState',  StartState
+	createState 'LeftOrRight', LeftOrRight 
+	createState 'Editor',      Editor
+	createState 'LeftTicking', LeftTicking
+	createState 'RightTicking',RightTicking
+	createState 'LeftPaused',  LeftPaused
+	createState 'RightPaused', RightPaused
 
-	startState.setTransitions()
-	leftOrRight.setTransitions()
-	editor.setTransitions()
-	leftTicking.setTransitions()
-	rightTicking.setTransitions()
-	leftPaused.setTransitions()
-	rightPaused.setTransitions()
-
-	currState = startState
+	currState = states.StartState
 	console.log currState
 
 draw = ->
 	background 'black'
 	fill 'White'
 	text currState.name,150,150
-	for key of currState.buttons
-		if key of buttons
-			button = buttons[key]
-			button.draw()
-		else
-			console.log 'missing button:',key
+	for key of currState.transitions
+		if key of buttons then buttons[key].draw()
+		else console.log 'missing button:',key
 
 mouseClicked = ->
-	for key of currState.buttons
-		button = buttons[key]
-		if button.inside mouseX, mouseY
-			currState.message key
-			break
+	for key of currState.transitions
+		if currState.transitions[key] == '' then continue
+		if buttons[key].inside mouseX, mouseY then currState.message key
