@@ -61,6 +61,7 @@ Optimized for Android
 ### Handicap based on ELO
 
 * round(ELODifference / 20)
+  * please feel free to choose your own constant (20 is just a suggestion)
 * Maximum 50.
 ####
 Example table

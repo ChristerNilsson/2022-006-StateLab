@@ -244,15 +244,16 @@ class Editor extends State
 makeEditButtons = ->
 	for i in range 6
 		letter = 'abcdef'[i]
-		size = 0.13*width
-		xoff = size/2 + (width-6*size)/2
+		xsize = width/6
+		ysize = height/10
+		xoff = xsize/2 + (width-6*xsize)/2
 		yoff = 0.33*height
 		shown='h m s m s t'.split ' '
-		buttons[letter] = new DeadButton shown[i], xoff+size*i, 0.26*height 
+		buttons[letter] = new DeadButton shown[i], xoff+xsize*i, 0.26*height 
 		for j in range 6
 			number = [1,2,4,8,15,30][j]
 			name = letter + j
-			buttons[name] = new EditButton number, xoff+size*i, yoff+size*j, size, size, 'gray'
+			buttons[name] = new EditButton number, xoff+xsize*i, yoff+ysize*j, xsize, ysize, 'gray'
 
 
 createState = (key,klass) -> states[key] = new klass key
@@ -290,12 +291,11 @@ console.log hms(180), [0,3,0]
 preload = -> qr = loadImage 'qr.png'
 
 setup = ->
-	# os = navigator.appVersion
-	# console.log os
-	# ok = os.indexOf('Mac') == -1 and os.indexOf('Windows') == -1
-	# if ok then createCanvas screen.width,screen.height
-	createCanvas screen.width,screen.height
-	#else createCanvas innerWidth,innerHeight
+	os = navigator.appVersion
+	if os.indexOf('Windows') == -1
+		createCanvas screen.width,screen.height
+	else
+		createCanvas innerWidth,innerHeight
 
 	diag = sqrt width*width + height*height
 
@@ -319,14 +319,14 @@ setup = ->
 	buttons.qr      = new ImageButton qr,0.5*w, 0.5*h, size, size
 	
 	# Edit Page
-	buttons.swap  = new Button 'swap', 0.33*w, 0.93*h, 0.20*w, 0.08*h
-	buttons.ok    = new Button 'ok',   0.67*w, 0.93*h, 0.20*w, 0.08*h
+	buttons.swap  = new Button 'swap', 0.33*w, 0.93*h, 0.22*w, 0.08*h
+	buttons.ok    = new Button 'ok',   0.67*w, 0.93*h, 0.22*w, 0.08*h
 	buttons.red   = new ColorButton 'red',   w/2, 0.03*h
 	buttons.white = new ColorButton 'white', w/2, 0.09*h
 	buttons.green = new ColorButton 'green', w/2, 0.15*h
-	buttons.reflection = new DeadButton 'reflection', 0.30*w, 0.21*h
-	buttons.bonus = new DeadButton 'bonus', 0.63*w, 0.21*h
-	buttons.hcp   = new DeadButton 'hcp', 0.83*w, 0.21*h
+	buttons.reflection = new DeadButton 'reflection', 0.25*w, 0.21*h
+	buttons.bonus = new DeadButton 'bonus', 0.66*w, 0.21*h
+	buttons.hcp   = new DeadButton 'hcp', 0.92*w, 0.21*h
 
 	makeEditButtons()
 
