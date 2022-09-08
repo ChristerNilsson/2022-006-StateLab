@@ -13,7 +13,7 @@ class Button
 	draw : (disabled) ->
 		if disabled then fill 'lightgray' else fill @bg
 		rect @x,@y,@w,@h
-		textSize 0.04*height
+		textSize 0.06*height
 		fill @fg
 		text @text,@x,@y
 	inside : -> -@w/2 <= mouseX-@x <= @w/2 and -@h/2 <= mouseY-@y <= @h/2
@@ -143,18 +143,19 @@ class LeftOrRight extends State
 	constructor : (@name) ->
 		super()
 		@createTrans 'qr left=>RightTicking right=>LeftTicking pause=>StartState'
+	draw : ->
+		buttons.left.fg = 'white'
+		buttons.right.fg = 'white'
 
 class LeftTicking extends State
 	constructor : (@name) ->
 		super()
 		@createTrans 'qr right left=>RightTicking pause=>LeftPaused'
 	draw : ->
-		console.log 'LeftTicking'
 		if not timeout[0] then states.Editor.clocks[0] -= 1/60
 		if states.Editor.clocks[0] <= 0 
 			states.Editor.clocks[0] = 0
 			timeout[0] = true
-			console.log timeout
 		buttons.left.fg = 'white'
 		buttons.right.fg = 'black'
 		super()
@@ -171,12 +172,10 @@ class RightTicking extends State
 		super()
 		@createTrans 'qr left right=>LeftTicking pause=>RightPaused'
 	draw : ->
-		console.log 'RightTicking'
 		if not timeout[1] then states.Editor.clocks[1] -= 1/60
 		if states.Editor.clocks[1] <= 0 
 			states.Editor.clocks[1] = 0
 			timeout[1] = true
-			console.log timeout
 		buttons.left.fg = 'black'
 		buttons.right.fg = 'white'
 		super()
@@ -310,8 +309,8 @@ setup = ->
 	buttons.qr      = new ImageButton qr,0.5*w, 0.5*h, size, size
 	
 	# Edit Page
-	buttons.swap  = new Button 'swap', 0.33*w, 0.93*h, 0.14*w, 0.09*h
-	buttons.ok    = new Button 'ok',   0.67*w, 0.93*h, 0.14*w, 0.09*h
+	buttons.swap  = new Button 'swap', 0.33*w, 0.93*h, 0.20*w, 0.08*h
+	buttons.ok    = new Button 'ok',   0.67*w, 0.93*h, 0.20*w, 0.08*h
 	buttons.red   = new ColorButton 'red',   w/2, 0.03*h
 	buttons.white = new ColorButton 'white', w/2, 0.09*h
 	buttons.green = new ColorButton 'green', w/2, 0.15*h
