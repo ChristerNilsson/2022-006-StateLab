@@ -4,8 +4,8 @@ MINUTE = 60
 buttons = {}
 states = {}
 
+qr = null
 timeout = [false,false]
-
 currState = null
 
 class Button
@@ -16,6 +16,12 @@ class Button
 		textSize 0.04*height
 		fill @fg
 		text @text,@x,@y
+	inside : -> -@w/2 <= mouseX-@x <= @w/2 and -@h/2 <= mouseY-@y <= @h/2
+
+class ImageButton
+	constructor : (@image,@x,@y,@w,@h) ->
+	draw :  ->
+		if @image then image @image,(width-@w)/2,(height-@h)/2,@w,@h
 	inside : -> -@w/2 <= mouseX-@x <= @w/2 and -@h/2 <= mouseY-@y <= @h/2
 
 class RotateButton extends Button
@@ -117,20 +123,31 @@ console.log hms(180), [0,3,0]
 
 ###################################
 
+class WelcomeState extends State
+	constructor : (@name) ->
+		super()
+		@createTrans 'welcome=>StartState'
+	message : (key) ->
+		if key == 'welcome'
+			os = navigator.userAgent
+			console.log os
+			if os.match /Android|webOS|iPhone|iPod|Blackberry/i then toggleFullScreen()
+		super key
+
 class StartState extends State
 	constructor : (@name) ->
 		super()
-		@createTrans 'left right play=>LeftOrRight new=>Editor'
+		@createTrans 'qr left right play=>LeftOrRight new=>Editor'
 
 class LeftOrRight extends State
 	constructor : (@name) ->
 		super()
-		@createTrans 'left=>RightTicking right=>LeftTicking pause=>StartState'
+		@createTrans 'qr left=>RightTicking right=>LeftTicking pause=>StartState'
 
 class LeftTicking extends State
 	constructor : (@name) ->
 		super()
-		@createTrans 'right left=>RightTicking pause=>LeftPaused'
+		@createTrans 'qr right left=>RightTicking pause=>LeftPaused'
 	draw : ->
 		console.log 'LeftTicking'
 		if not timeout[0] then states.Editor.clocks[0] -= 1/60
@@ -152,7 +169,7 @@ class LeftTicking extends State
 class RightTicking extends State
 	constructor : (@name) ->
 		super()
-		@createTrans 'left right=>LeftTicking pause=>RightPaused'
+		@createTrans 'qr left right=>LeftTicking pause=>RightPaused'
 	draw : ->
 		console.log 'RightTicking'
 		if not timeout[1] then states.Editor.clocks[1] -= 1/60
@@ -174,12 +191,12 @@ class RightTicking extends State
 class LeftPaused extends State
 	constructor : (@name) ->
 		super()
-		@createTrans 'left right play=>LeftTicking new=>Editor'
+		@createTrans 'qr left right play=>LeftTicking new=>Editor'
 
 class RightPaused extends State
 	constructor : (@name) ->
 		super()
-		@createTrans 'left right play=>RightTicking new=>Editor'
+		@createTrans 'qr left right play=>RightTicking new=>Editor'
 
 class Editor extends State
 	constructor : (@name) ->
@@ -266,9 +283,11 @@ makeEditButtons = ->
 			name = letter + j
 			buttons[name] = new EditButton number, xoff+size*i, yoff+size*j, size, size, 'gray'
 
+preload = -> qr = loadImage 'qr.png'
+
 setup = ->
-	createCanvas screen.width,screen.height
-	#createCanvas innerWidth,innerHeight
+	#createCanvas screen.width,screen.height
+	createCanvas innerWidth,innerHeight
 	#createCanvas 600,900
 
 	background 'black'
@@ -281,11 +300,14 @@ setup = ->
 	h = height
 
 	# Main Page
-	buttons.left  = new RotateButton 0.5*w, 0.22*h, w,     0.44*h, 180, 'red',  'black', 0 # eg up
-	buttons.right = new RotateButton 0.5*w, 0.78*h, w,     0.44*h,   0, 'green','black', 1 # eg down
-	buttons.play  = new Button 'play',  0.2*w, 0.50*h, 0.4*w, 0.12*h
-	buttons.pause = new Button 'pause', 0.2*w, 0.50*h, 0.4*w, 0.12*h
-	buttons.new   = new Button 'new',   0.8*w, 0.50*h, 0.4*w, 0.12*h
+	size = 0.12*h # qr
+	buttons.welcome = new Button 'Welcome!', 0.5*w, 0.5*h, 0.5*w, 0.5*h
+	buttons.left    = new RotateButton    0.5*w, 0.22*h, w,     0.44*h, 180, 'red',  'black', 0 # eg up
+	buttons.right   = new RotateButton    0.5*w, 0.78*h, w,     0.44*h,   0, 'green','black', 1 # eg down
+	buttons.play    = new Button 'play',  0.25*(w-size), 0.50*h, (w-size)/2, size
+	buttons.pause   = new Button 'pause', 0.25*(w-size), 0.50*h, (w-size)/2, size
+	buttons.new     = new Button 'new',   w-0.25*(w-size), 0.50*h, (w-size)/2, size
+	buttons.qr      = new ImageButton qr,0.5*w, 0.5*h, size, size
 	
 	# Edit Page
 	buttons.swap  = new Button 'swap', 0.33*w, 0.93*h, 0.14*w, 0.09*h
@@ -301,6 +323,7 @@ setup = ->
 
 	console.log buttons
 
+	createState 'WelcomeState',WelcomeState
 	createState 'StartState',  StartState
 	createState 'LeftOrRight', LeftOrRight
 	createState 'Editor',      Editor
@@ -309,7 +332,7 @@ setup = ->
 	createState 'LeftPaused',  LeftPaused
 	createState 'RightPaused', RightPaused
 
-	currState = states.StartState
+	currState = states.WelcomeState
 	console.log 'currState',currState
 
 draw = ->
@@ -330,7 +353,6 @@ draw = ->
 	currState.draw()
 
 mouseClicked = ->
-	toggleFullScreen()
 	for key of currState.transitions
 		if currState.transitions[key] == undefined then continue
 		console.log key
