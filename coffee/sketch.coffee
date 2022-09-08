@@ -95,7 +95,7 @@ class WelcomeState extends State
 	message : (key) ->
 		if key == 'welcome'
 			os = navigator.appVersion
-			ok = os.indexOf('Mac') == -1 and os.indexOf('Windows') == -1
+			ok = os.indexOf('Linux') >= 0 
 			console.log ok
 			if ok then toggleFullScreen()
 		super key
@@ -286,7 +286,7 @@ preload = -> qr = loadImage 'qr.png'
 setup = ->
 	os = navigator.appVersion
 	console.log os
-	if os.indexOf('Windows') == -1 and os.indexOf('Mac') == -1
+	if os.indexOf('Linus') >= 0 
 		createCanvas screen.width,screen.height # android
 	else
 		createCanvas innerWidth,innerHeight # Windows or Mac
@@ -348,9 +348,9 @@ draw = ->
 
 	# debug
 
-	os = navigator.appVersion
-	textSize 0.025 * height
-	text os,0.5*width,0.05*height
+	# os = navigator.appVersion
+	# textSize 0.025 * height
+	# text os,0.5*width,0.05*height
 
 	# text currState.name,0.5*width,0.03*height
 	# fill 'green'
