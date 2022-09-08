@@ -8,12 +8,14 @@ qr = null
 timeout = [false,false]
 currState = null
 
+diag = 0 
+
 class Button
 	constructor : (@text,@x,@y,@w,@h,@bg='white',@fg='black') ->
 	draw : (disabled) ->
 		if disabled then fill 'lightgray' else fill @bg
 		rect @x,@y,@w,@h
-		textSize 0.06*height
+		textSize 0.04*diag
 		fill @fg
 		text @text,@x,@y
 	inside : -> -@w/2 <= mouseX-@x <= @w/2 and -@h/2 <= mouseY-@y <= @h/2
@@ -40,19 +42,19 @@ class RotateButton extends Button
 		push()
 		translate @x,@y
 		rotate @degrees
-		textSize 0.22*height
+		textSize 0.18*diag
 		fill @fg
 		text ss,0,0.017*height
-		textSize 0.05*height
-		text '+' + round3(states.Editor.bonuses[@player])+'s',0,90
-		if timeout[@player] then text 'Out of time',0,-90
+		textSize 0.05*diag
+		text '+' + round3(states.Editor.bonuses[@player])+'s',0,0.15*height
+		if timeout[@player] then text 'Out of time',0,-0.15*height
 		pop()
 
 class EditButton extends Button
 	constructor : (text,x,y,w,h,fg='gray') ->
 		super text,x,y,w,h,'black',fg
 	draw : ->
-		textSize 0.05*height
+		textSize 0.05*diag
 		fill @fg
 		text @text,@x,@y
 
@@ -60,7 +62,7 @@ class DeadButton extends Button
 	constructor : (text,x,y,fg='lightgray') ->
 		super text,x,y,0,0,'black',fg
 	draw : ->
-		textSize 0.05*height
+		textSize 0.04*diag
 		fill @fg
 		text @text,@x,@y
 
@@ -70,7 +72,7 @@ class ColorButton extends Button
 	draw : ->
 		push()
 		textAlign CENTER,CENTER
-		textSize 0.04*height
+		textSize 0.04*diag
 		fill @fg
 		text @text,@x,@y
 		pop()
@@ -290,6 +292,8 @@ setup = ->
 	ok = os.indexOf('Mac') == -1 and os.indexOf('Windows') == -1
 	if ok then createCanvas screen.width,screen.height
 	else createCanvas innerWidth,innerHeight
+
+	diag = sqrt width*width + height*height
 
 	background 'black'
 
