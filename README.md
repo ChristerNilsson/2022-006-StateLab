@@ -39,6 +39,7 @@ The times will be 15m + 7.5s and 5m + 2.5s
 ### The QR code
 Contains the URL for the application.
 Use your camera or QR reader app.
+Optimized for Android
 
 ### Definitions
 * reflection = the time you thinking
