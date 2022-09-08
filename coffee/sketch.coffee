@@ -20,15 +20,12 @@ class Button
 		text @text,@x,@y
 	inside : -> -@w/2 <= mouseX-@x <= @w/2 and -@h/2 <= mouseY-@y <= @h/2
 
-class ImageButton
-	constructor : (@image,@x,@y,@w,@h) ->
-	draw :  ->
-		if @image then image @image,(width-@w)/2,(height-@h)/2,@w,@h
-	inside : -> -@w/2 <= mouseX-@x <= @w/2 and -@h/2 <= mouseY-@y <= @h/2
+class ImageButton extends Button
+	constructor : (@image,x,y,w,h) -> super '',x,y,w,h
+	draw :  -> if @image then image @image,(width-@w)/2,(height-@h)/2,@w,@h
 
 class RotateButton extends Button
-	constructor : (x,y,w,h,@degrees,bg,fg,@player) ->
-		super '',x,y,w,h,bg,fg
+	constructor : (x,y,w,h,@degrees,bg,fg,@player) -> super '',x,y,w,h,bg,fg
 
 	draw : ->
 		secs = states.Editor.clocks[@player]
@@ -51,24 +48,21 @@ class RotateButton extends Button
 		pop()
 
 class EditButton extends Button
-	constructor : (text,x,y,w,h,fg='gray') ->
-		super text,x,y,w,h,'black',fg
+	constructor : (text,x,y,w,h,fg='gray') -> super text,x,y,w,h,'black',fg
 	draw : ->
 		textSize 0.05*diag
 		fill @fg
 		text @text,@x,@y
 
 class DeadButton extends Button
-	constructor : (text,x,y,fg='lightgray') ->
-		super text,x,y,0,0,'black',fg
+	constructor : (text,x,y,fg='lightgray') -> super text,x,y,0,0,'black',fg
 	draw : ->
 		textSize 0.04*diag
 		fill @fg
 		text @text,@x,@y
 
 class ColorButton extends Button
-	constructor : (@fg,x,y) ->
-		super '',x,y,0,0
+	constructor : (@fg,x,y) -> super '',x,y,0,0
 	draw : ->
 		push()
 		textAlign CENTER,CENTER
@@ -255,7 +249,6 @@ makeEditButtons = ->
 			name = letter + j
 			buttons[name] = new EditButton number, xoff+xsize*i, yoff+ysize*j, xsize, ysize, 'gray'
 
-
 createState = (key,klass) -> states[key] = new klass key
 
 round3 = (x) -> Math.round(x*1000)/1000
@@ -292,10 +285,11 @@ preload = -> qr = loadImage 'qr.png'
 
 setup = ->
 	os = navigator.appVersion
-	if os.indexOf('Windows') == -1
-		createCanvas screen.width,screen.height
+	console.log os
+	if os.indexOf('Windows') == -1 and os.indexOf('Mac') == -1
+		createCanvas screen.width,screen.height # android
 	else
-		createCanvas innerWidth,innerHeight
+		createCanvas innerWidth,innerHeight # Windows or Mac
 
 	diag = sqrt width*width + height*height
 
@@ -353,6 +347,11 @@ draw = ->
 		else console.log 'missing button:',key
 
 	# debug
+
+	os = navigator.appVersion
+	textSize 0.025 * height
+	text os,0.5*width,0.05*height
+
 	# text currState.name,0.5*width,0.03*height
 	# fill 'green'
 	# text round3(states.Editor.bonuses[0]),0.1*width,0.03*height
