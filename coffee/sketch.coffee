@@ -100,11 +100,10 @@ class WelcomeState extends State
 		@createTrans 'welcome=>StartState'
 	message : (key) ->
 		if key == 'welcome'
-			# os = navigator.appVersion
-			# ok = os.indexOf('Mac') == -1 and os.indexOf('Windows') == -1
-			ok = true
+			os = navigator.appVersion
+			ok = os.indexOf('Mac') == -1 and os.indexOf('Windows') == -1
 			console.log ok
-			#if ok then toggleFullScreen()
+			if ok then toggleFullScreen()
 		super key
 
 class StartState extends State
