@@ -129,9 +129,10 @@ class WelcomeState extends State
 		@createTrans 'welcome=>StartState'
 	message : (key) ->
 		if key == 'welcome'
-			os = navigator.userAgent
-			console.log os
-			if os.match /Android|webOS|iPhone|iPod|Blackberry/i then toggleFullScreen()
+			os = navigator.appVersion
+			ok = os.indexOf('Mac') == -1 and os.indexOf('Windows') == -1
+			console.log ok
+			if ok then toggleFullScreen()
 		super key
 
 class StartState extends State
@@ -285,8 +286,8 @@ makeEditButtons = ->
 preload = -> qr = loadImage 'qr.png'
 
 setup = ->
-	#createCanvas screen.width,screen.height
-	createCanvas innerWidth,innerHeight
+	createCanvas screen.width,screen.height
+	#createCanvas innerWidth,innerHeight
 	#createCanvas 600,900
 
 	background 'black'
