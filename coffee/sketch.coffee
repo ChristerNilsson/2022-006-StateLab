@@ -286,8 +286,8 @@ preload = -> qr = loadImage 'qr.png'
 setup = ->
 	os = navigator.appVersion
 	console.log os
-	if os.indexOf('Linus') >= 0 
-		createCanvas screen.width,screen.height # android
+	if os.indexOf('Linux') >= 0 
+		createCanvas screen.width,screen.height # android/linux
 	else
 		createCanvas innerWidth,innerHeight # Windows or Mac
 
