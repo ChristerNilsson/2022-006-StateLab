@@ -88,22 +88,27 @@ class State
 	patch : ->
 	draw : ->
 
-class WelcomeState extends State
-	constructor : (@name) ->
-		super()
-		@createTrans 'welcome=>StartState'
-	message : (key) ->
-		if key == 'welcome'
-			os = navigator.appVersion
-			ok = os.indexOf('Linux') >= 0 
-			console.log ok
-			if ok then toggleFullScreen()
-		super key
+# class WelcomeState extends State
+# 	constructor : (@name) ->
+# 		super()
+# 		@createTrans 'welcome=>StartState'
+# 	message : (key) ->
+# 		if key == 'welcome'
+# 			os = navigator.appVersion
+# 			ok = os.indexOf('Linux') >= 0 
+# 			console.log ok
+# 			#if ok then toggleFullScreen()
+# 		super key
 
 class StartState extends State
 	constructor : (@name) ->
 		super()
-		@createTrans 'qr left right play=>LeftOrRight new=>Editor'
+		@createTrans 'qr=>StartState left right play=>LeftOrRight new=>Editor'
+	message : (key) ->
+		if key=='qr' 
+			toggleFullScreen()
+			resizeCanvas windowWidth, windowHeight
+		super key
 
 class LeftOrRight extends State
 	constructor : (@name) ->
@@ -283,13 +288,16 @@ console.log hms(180), [0,3,0]
 
 preload = -> qr = loadImage 'qr.png'
 
+#windowResized = -> resizeCanvas windowWidth, windowHeight
+
 setup = ->
 	os = navigator.appVersion
 	console.log os
-	if os.indexOf('Linux') >= 0 
-		createCanvas screen.width,screen.height # android/linux
+	if os.indexOf('Linux') >= 0 # android/linux
+		createCanvas screen.width,screen.height
+		#createCanvas displaywidth,displayHeight
 	else
-		createCanvas innerWidth,innerHeight # Windows or Mac
+		createCanvas window.innerWidth,window.innerHeight # Windows or Mac
 
 	diag = sqrt width*width + height*height
 
@@ -304,7 +312,7 @@ setup = ->
 
 	# Main Page
 	size = 0.12*h # qr
-	buttons.welcome = new Button 'Welcome!', 0.5*w, 0.5*h, w, h
+	#buttons.welcome = new Button 'Welcome!', 0.5*w, 0.5*h, w, h
 	buttons.left    = new RotateButton    0.5*w, 0.22*h, w,     0.44*h, 180, 'red',  'black', 0 # eg up
 	buttons.right   = new RotateButton    0.5*w, 0.78*h, w,     0.44*h,   0, 'green','black', 1 # eg down
 	buttons.play    = new Button 'play',  0.25*(w-size), 0.50*h, (w-size)/2, size
@@ -326,7 +334,7 @@ setup = ->
 
 	console.log buttons
 
-	createState 'WelcomeState',WelcomeState
+	#createState 'WelcomeState',WelcomeState
 	createState 'StartState',  StartState
 	createState 'LeftOrRight', LeftOrRight
 	createState 'Editor',      Editor
@@ -335,7 +343,7 @@ setup = ->
 	createState 'LeftPaused',  LeftPaused
 	createState 'RightPaused', RightPaused
 
-	currState = states.WelcomeState
+	currState = states.StartState
 	console.log 'currState',currState
 
 draw = ->
@@ -349,8 +357,9 @@ draw = ->
 	# debug
 
 	# os = navigator.appVersion
-	# textSize 0.025 * height
-	# text os,0.5*width,0.05*height
+	textSize 0.025 * height
+	text width,0.5*width,0.05*height
+	text height,0.75*width,0.05*height
 
 	# text currState.name,0.5*width,0.03*height
 	# fill 'green'
