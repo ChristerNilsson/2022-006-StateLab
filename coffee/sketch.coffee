@@ -286,9 +286,10 @@ makeEditButtons = ->
 preload = -> qr = loadImage 'qr.png'
 
 setup = ->
-	createCanvas screen.width,screen.height
-	#createCanvas innerWidth,innerHeight
-	#createCanvas 600,900
+	os = navigator.appVersion
+	ok = os.indexOf('Mac') == -1 and os.indexOf('Windows') == -1
+	if ok then createCanvas screen.width,screen.height
+	else createCanvas innerWidth,innerHeight
 
 	background 'black'
 
